@@ -6,6 +6,7 @@ import {
     
 } from "firebase/auth";
 import { auth } from "./firebase.js";
+import { adminAuth } from "./admin.js";
 
 class DoAuth {
 

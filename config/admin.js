@@ -3,7 +3,7 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-import serviceAccount from "./admin.json" assert { type: "json" };
+const serviceAccount = JSON.parse(Buffer.from(process.env.FIREBASE_ADMIN_JSON, 'base64').toString('utf8'));
 
 if (!admin.apps.length) {
   admin.initializeApp({

@@ -2,7 +2,8 @@
 
  class UserService {
     constructor(){
-        this.db = new Database
+        this.collection = "user";
+        this.db = new Database;
     }
 
     async createUser(uid, data){
@@ -17,7 +18,7 @@
     async getUserByUid(uid){
         //Filtrar se vai buscar tudo de user ou não(subcollections)
         try {
-            return await this.db.getDocByUid(uid);
+            return await this.db.getDocByUid(uid, this.collection);
         } catch (error) {
             console.error("[UserService::getUserByUid]: ", error);
             throw new Error("Erro ao buscar dados do usuário");        
@@ -42,6 +43,16 @@
         }
     }
 
+    async deleteUser(uid){
+        console.log("Service;", uid)
+        try {
+            return await this.db.deleteDoc(uid, this.collection);
+        } catch (error) {
+            console.error("[UserService::deleteUser]: ", error);
+            throw new Error("Erro ao deletar conta");
+        }
+    }
+    
  }
 
  export default UserService

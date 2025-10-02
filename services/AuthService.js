@@ -46,14 +46,25 @@ class AuthService {
             return {
                 success: true,
                 message: "E-mail de redefinição enviado com sucesso"
-            };
+            }
         } catch (error) {
             console.error("[AuthService::sendPasswordResetEmail]:", error);
             throw error;
         }
     }
 
-    async deleteUserAccount(){}
+    async deleteUserAccount(uid){
+        try {
+            await this.doAuth.doDeleteUser(uid);
+            return {
+                succes: true,
+                message: "Conta excluida com sucesso"
+            }
+        } catch (error) {
+            console.error("[AuthService::deleteUserAccount]: ", error);
+            throw error;
+        }
+    }
 }
 
 export default AuthService;

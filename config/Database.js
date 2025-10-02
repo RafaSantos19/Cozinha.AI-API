@@ -29,7 +29,7 @@ class Database {
     async createUserDoc(uid, data) {
         try {
             const userRef = doc(db, this.user, uid);
-            const userDocData = { ...user, ...data, createdAt: Timestamp.now() }; 
+            const userDocData = { ...user, ...data, createdAt: Timestamp.now() };
             await setDoc(userRef, userDocData);
 
             const favoritesRef = collection(userRef, this.subcollections.favorites);
@@ -52,12 +52,12 @@ class Database {
             const snapshot = await getDocs(q);
 
             if (snapshot.empty) {
-                return { success: false, message: MESSAGES.NOT_FOUND };
+                return { success: false, message: "Usuário não encontrado" };
             }
 
             const userDoc = snapshot.docs[0];
             const user = { uid: userDoc.id, ...userDoc.data() };
-            return { success: true, message: MESSAGES.FETCH_SUCCESS, data: user };
+            return { success: true, message: "Usuário encontrado com sucesso", data: user };
         } catch (error) {
             console.error(`[Database::getUserDocumentByEmail] ${MESSAGES.FETCH_ERROR} email:${email}:`, error);
             throw error;
@@ -66,14 +66,14 @@ class Database {
 
     async updateUserDoc(uid, newData) {
         try {
-            const userRef = doc(db, this.collectionName, uid);
+            const userRef = doc(db, this.user, uid);
             const snapshot = await getDoc(userRef);
-            if (!snapshot.exists()) return { success: false, message: MESSAGES.NOT_FOUND };
+            if (!snapshot.exists()) return { success: false, message: "Erro ao atualizar dados" };
 
             await updateDoc(userRef, newData);
-            return { success: true, message: MESSAGES.UPDATE_SUCCESS, updatedAt: new Date().toISOString() };
+            return { success: true, message: "Dados atualizados com sucesso", updatedAt: new Date().toISOString() };
         } catch (error) {
-            console.error(`[Database::updateUserDocument] ${MESSAGES.UPDATE_ERROR} uid:${uid}:`, error);
+            console.error(`[Database::updateUserDocument] uid:${uid}:`, error);
             throw error;
         }
     }
@@ -85,7 +85,7 @@ class Database {
             const docRef = doc(db, collName, uid);
             const snapshot = await getDoc(docRef);
             if (!snapshot.exists()) {
-                return { success: false, message: MESSAGES.NOT_FOUND };
+                return { success: false, message: "Dados recuperados com sucesso" };
             }
             const data = { uid, ...snapshot.data() }
             return { success: true, data: data };
@@ -96,6 +96,35 @@ class Database {
     }
 
     async updateDoc() { }
+
+    async deleteDoc(uid, collName) {
+
+        try {
+            const docRef = doc(db, collName, uid);
+            const snapshot = await getDoc(docRef);
+
+            if (!snapshot.exists()) {
+                return { success: false, message: "Documento não encontrado" };
+            }
+
+            const subcollections = ["favorites", "suggestions"];
+            for (const sub of subcollections) {
+                const subColRef = collection(docRef, sub);
+                const subSnapshot = await getDocs(subColRef);
+
+                for (const subDoc of subSnapshot.docs) {
+                    await deleteDoc(doc(subColRef, subDoc.id));
+                }
+            }
+
+            await deleteDoc(docRef);
+
+            return { success: true, message: "Documento e subcollections deletados com sucesso", deletedAt: new Date().toISOString() };
+        } catch (error) {
+            console.error(`[Database::deleteDoc] uid:${uid}, collName:${collName}`, error);
+            throw error;
+        }
+    }
 
 }
 
