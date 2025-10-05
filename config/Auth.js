@@ -62,7 +62,7 @@ class DoAuth {
         }
     }
     
-        async doDeleteUser(uid){
+    async doDeleteUser(uid){
         try {
             await adminAuth.deleteUser(uid);
             return {success: true};
