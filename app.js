@@ -5,6 +5,7 @@ import morgan from 'morgan';
 import helmet from 'helmet';
 import authRouter from './routes/AuthRoutes.js';
 import userRouter from './routes/UserRoutes.js';
+import recipeRouter from './routes/RecipeRoutes.js';
 
 dotenv.config();
 
@@ -18,6 +19,7 @@ app.use(morgan("dev"));
 
 app.use("/user", userRouter);
 app.use("/auth", authRouter);
+app.use("/recipe", recipeRouter);
 
 app.get("/teste", (req, res) => {
     res.json({message: "Vivo"})

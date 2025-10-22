@@ -4,7 +4,7 @@ export const user = {
     name: "",
     email: "",
     //password: "",
-    auth: false,
+    //auth: false,
     local: "",
     goals: [],
     appliances: [],

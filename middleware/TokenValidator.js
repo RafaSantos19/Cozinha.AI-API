@@ -18,8 +18,6 @@ export const verifyToken = async (req, res, next) => {
       email: decoded.email,
     };
     
-    //console.log(req.user);
-
     next();
   } catch (error) {
     res.status(403).json({ message: "Token inválido ou expirado", error: error.message });
