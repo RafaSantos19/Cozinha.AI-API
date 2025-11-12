@@ -1,6 +1,6 @@
 import AuthService from "../services/AuthService.js";
 import { registerUserUseCase } from "../use-case/RegisterUserUseCase.js";
-
+import { profileUserUseCase } from "../use-case/ProfileUserUseCase.js";
 class AuthController{
     constructor() {
         this.authService = new AuthService();
@@ -30,14 +30,14 @@ class AuthController{
 
     async userLogin(req, res){
         const { email, password } = req.body;
-
         if(!email && !password){
             return res.status(400).json({message: "Dados inválidos"});
         }
 
         try {
-            const result = await this.authService.userLogin(email, password);
-            
+            //const result = await this.authService.userLogin(email, password);
+            const result = await profileUserUseCase(email, password);
+
             if(result.success === false) {
                 return res.status(400).json({message: "Email não verificado"});
             }
