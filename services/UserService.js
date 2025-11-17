@@ -44,7 +44,6 @@
     }
 
     async deleteUser(uid){
-        console.log("Service;", uid)
         try {
             return await this.db.deleteDoc(uid, this.collection);
         } catch (error) {

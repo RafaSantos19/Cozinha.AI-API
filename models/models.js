@@ -16,23 +16,11 @@ export const user = {
 };
 
 export const favorites = {
-    sourceSuggestionId: "",
-    recipe: {},
-    createdAt: Timestamp
+    receitas: []
 };
 
 export const suggestions = {
-    ingredientsText: "",
-    ingredientsNorm: "",
-    context: {},
-    recipes: [],
-    model: "",
-    tokens: 0,
-    parseOk: false,
-    createdAt: Timestamp
+    receitas: []
 };
 
-const payload = {
-
-}
 

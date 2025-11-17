@@ -11,7 +11,7 @@ export async function GenerateRecipeUseCase(ingredients, user) {
 
   const safe = await assertNoAllergensOrFix(parsed, user?.allergies || []);
 
-  console.log("safe: ", safe.receitas)
+  //console.log("safe: ", safe.receitas)
 
   return safe.receitas;
 }

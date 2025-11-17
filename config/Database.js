@@ -78,6 +78,185 @@ class Database {
         }
     }
 
+    async addSuggestion(uid, suggestionData) {
+        try {
+
+            if (!uid) {
+                throw new Error("UID do usuário não informado");
+            }
+
+            const userRef = doc(db, this.user, uid);
+            const suggestionsRef = collection(userRef, this.subcollections.suggestions);
+
+            const snapshot = await getDocs(suggestionsRef);
+
+            let suggestionsDocRef;
+            let receitasAtuais = [];
+
+            if (snapshot.empty) {
+                suggestionsDocRef = await addDoc(suggestionsRef, {
+                    receitas: [],
+                    createdAt: Timestamp.now(),
+                });
+            } else {
+                const docSnap = snapshot.docs[0];
+                suggestionsDocRef = docSnap.ref;
+                const data = docSnap.data();
+                receitasAtuais = Array.isArray(data.receitas) ? data.receitas : [];
+            }
+
+            const novasReceitas = Array.isArray(suggestionData)
+                ? suggestionData
+                : [suggestionData];
+
+            const novasReceitasComTimestamp = novasReceitas.map((r) => ({
+                ...r,
+                createdAt: Timestamp.now(),
+            }));
+
+            let todasReceitas = [...receitasAtuais, ...novasReceitasComTimestamp];
+
+            if (todasReceitas.length > 10) {
+                const excesso = todasReceitas.length - 10;
+                todasReceitas = todasReceitas.slice(excesso);
+            }
+
+            await updateDoc(suggestionsDocRef, {
+                receitas: todasReceitas,
+                updatedAt: Timestamp.now(),
+            });
+
+            return { success: true, message: "Sugestões adicionadas com sucesso!" };
+        } catch (error) {
+            console.error(`[Database::addSuggestion] uid:${uid}:`, error);
+            throw error;
+        }
+    }
+
+
+    async getSuggestions(uid) {
+        try {
+            const userRef = doc(db, this.user, uid);
+            const suggestionsRef = collection(userRef, this.subcollections.suggestions);
+
+            const snapshot = await getDocs(suggestionsRef);
+
+            if (snapshot.empty) {
+                return { success: false, message: "Nenhuma sugestão encontrada para esse usuário." };
+            }
+
+            const suggestionsDoc = snapshot.docs[0].data();
+            const receitas = Array.isArray(suggestionsDoc.receitas)
+                ? suggestionsDoc.receitas
+                : [];
+
+            return { success: true, data: receitas };
+        } catch (error) {
+            console.error(`[Database::getUserSuggestions] uid:${uid}:`, error);
+            throw error;
+        }
+    }
+
+    async addFavorite(uid, favoriteData) {
+        try {
+
+            if (!uid) {
+                throw new Error("UID do usuário não informado");
+            }
+
+            if (!favoriteData) {
+                throw new Error("Nenhuma receita enviada para favoritar");
+            }
+
+            const nomeReceita = favoriteData.nome || favoriteData.name;
+            if (!nomeReceita) {
+                throw new Error("Receita favorita precisa ter um campo 'nome'.");
+            }
+
+            const userRef = doc(db, this.user, uid);
+            const favoritesRef = collection(userRef, this.subcollections.favorites);
+
+            const snapshot = await getDocs(favoritesRef);
+
+            let favoritesDocRef;
+            let receitasAtuais = [];
+
+            if (snapshot.empty) {
+            
+                favoritesDocRef = await addDoc(favoritesRef, {
+                    receitas: [],
+                    createdAt: Timestamp.now(),
+                });
+            } else {
+                const docSnap = snapshot.docs[0];
+                favoritesDocRef = docSnap.ref;
+                const data = docSnap.data();
+                receitasAtuais = Array.isArray(data.receitas) ? data.receitas : [];
+            }
+
+            const indexExistente = receitasAtuais.findIndex(
+                (r) => r.nome === nomeReceita
+            );
+
+            let acao;
+
+            if (indexExistente !== -1) {
+                
+                receitasAtuais.splice(indexExistente, 1);
+                acao = "removed";
+            } else {
+                
+                receitasAtuais.push({
+                    ...favoriteData,
+                    favoritedAt: Timestamp.now(),
+                });
+                acao = "added";
+            }
+
+            
+            await updateDoc(favoritesDocRef, {
+                receitas: receitasAtuais,
+                updatedAt: Timestamp.now(),
+            });
+
+            return {
+                success: true,
+                action: acao,
+                message:
+                    acao === "added"
+                        ? "Receita adicionada aos favoritos com sucesso!"
+                        : "Receita removida dos favoritos com sucesso!",
+            };
+        } catch (error) {
+            console.error(`[Database::addFavorite] uid:${uid}:`, error);
+            throw error;
+        }
+    }
+
+
+    async getUserFavorites(uid) {
+        try {
+            const userRef = doc(db, this.user, uid);
+            const favoritesRef = collection(userRef, this.subcollections.favorites);
+
+            const snapshot = await getDocs(favoritesRef);
+
+            if (snapshot.empty) {
+                return { success: false, message: "Nenhum favorito encontrado para esse usuário." };
+            }
+
+            const favoritesDoc = snapshot.docs[0].data();
+            const receitas = Array.isArray(favoritesDoc.receitas)
+                ? favoritesDoc.receitas
+                : [];
+
+            return { success: true, data: receitas };
+        } catch (error) {
+            console.error(`[Database::getUserFavorites] uid:${uid}:`, error);
+            throw error;
+        }
+    }
+
     /* Métodos Génericos */
 
     async getDocByUid(uid, collName) {

@@ -21,6 +21,15 @@ app.use("/user", userRouter);
 app.use("/auth", authRouter);
 app.use("/recipe", recipeRouter);
 
+app.use((req, res, next) => {
+  // 120000 ms = 2 minutos
+  res.setTimeout(120000, () => {
+    console.warn("Timeout de resposta atingido para:", req.originalUrl);
+    res.status(504).json({ message: "Tempo limite atingido" });
+  });
+  next();
+});
+
 app.get("/teste", (req, res) => {
     res.json({message: "Vivo"})
 });

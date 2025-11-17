@@ -6,5 +6,8 @@ const recipeRouter = express.Router()
 const recipeController = new RecipeController()
 
 recipeRouter.post("/generate", verifyToken, recipeController.generateRecipes.bind(recipeController));
+recipeRouter.get("/suggestions", verifyToken, recipeController.getSuggestions.bind(recipeController));
+recipeRouter.post("/favorites", verifyToken, recipeController.addFavorite.bind(recipeController));
+recipeRouter.get("/getFavorites", verifyToken, recipeController.getFavorites.bind(recipeController));
 
 export default recipeRouter;
