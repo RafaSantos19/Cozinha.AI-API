@@ -56,7 +56,7 @@ class AuthController{
         }
 
         try {
-            await this.authService.sendPasswordResetEmail(email);
+            await this.authService.userPasswordReset(email);
             return res.status(200).json({ message: "Email de recuperação enviado com sucesso" });
         } catch (error) {
             console.error("[AuthController::passwordReset]:", error);
