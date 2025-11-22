@@ -42,6 +42,19 @@ class RecipeService {
         }
     }
 
+    async getSuggestionsByName(userUid, recipeName) {
+        try {
+            if (!userUid || !recipeName) { 
+                throw new Error("UID do usuário ou nome da receita não informados");
+            }
+            const suggestion = await this.db.getSuggestionByName(userUid, recipeName);
+            return suggestion;
+        } catch (error) {
+            console.error("[RecipeService] Erro ao obter sugestão por nome:", error);
+            throw new Error("Falha ao obter sugestão de receita por nome.");
+        }   
+    }            
+
     async addFavorite(userUid, recipe) {
         try {
             if (!userUid || !recipe) {
@@ -67,7 +80,20 @@ class RecipeService {
             console.error("[RecipeService] Erro ao obter receitas favoritas:", error);
             throw new Error("Falha ao obter receitas favoritas.");
         }    
-    }  
+    }
+    
+    async getFavoriteByName(userUid, recipeName) {
+        try {
+            if (!userUid || !recipeName) {
+                throw new Error("UID do usuário ou nome da receita não informados");
+            }
+            const favorite = await this.db.getFavoriteByName(userUid, recipeName);
+            return favorite;
+        } catch (error) {
+            console.error("[RecipeService] Erro ao obter receita favorita por nome:", error);
+            throw new Error("Falha ao obter receita favorita por nome.");
+        }
+    }       
 
 }
 

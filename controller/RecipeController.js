@@ -40,6 +40,26 @@ class RecipeController {
         }
     }
 
+    async getSuggestionsByName(req, res) {
+        try {
+            const { uid } = req.user;
+            const { recipeName } = req.params;
+
+            console.log("Recipe Name:", recipeName);
+
+            if (!uid || !recipeName) {
+                return res.status(400).json({ message: "Valores inválidos" });
+            }
+
+            const suggestion = await this.recipeService.getSuggestionsByName(uid, recipeName);
+
+            return res.status(201).json(suggestion);
+        } catch (error) {
+            console.error("[RecipeController::getSuggestionsByName]: ", error);
+            return res.status(500).json({ message: "Erro ao obter sugestão de receita por nome" });
+        }
+    }
+
     async addFavorite(req, res) {
         try {
             const { uid } = req.user;
@@ -73,7 +93,28 @@ class RecipeController {
             console.error("[RecipeController::getFavorites]: ", error);
             return res.status(500).json({ message: "Erro ao obter receitas favoritas" });
         }
-    }       
+    }    
+    
+    
+    async getFavoriteByName(req, res) {
+        try {
+            const { uid } = req.user;
+            const { recipeName } = req.params;
+
+            console.log("Recipe Name:", recipeName);
+
+            if (!uid || !recipeName) {
+                return res.status(400).json({ message: "Valores inválidos" });
+            }
+
+            const favorite = await this.recipeService.getFavoriteByName(uid, recipeName);
+
+            return res.status(201).json(favorite);
+        } catch (error) {
+            console.error("[RecipeController::getFavoriteByName]: ", error);
+            return res.status(500).json({ message: "Erro ao obter receita favorita por nome" });
+        }
+    }
 }
 
 export default RecipeController;

@@ -9,16 +9,37 @@ const MacroSchema = z.object({
 
 const RecipeSchema = z.object({
   nome: z.string().min(2),
+
   tempo_preparo_min: z.number().int().positive(),
+
   dificuldade: z.enum(["fácil", "médio", "difícil"]),
+
   porcoes: z.number().int().positive(),
+
   lista_ingredientes: z.array(z.string().min(1)).min(1),
-  modo_preparo: z.array(z.string().min(3)).min(2),
+
+  categoria: z.enum([
+    "café_da_manhã",
+    "almoço",
+    "jantar",
+    "lanche",
+    "sobremesa",
+    "outro"
+  ]),
+
+  rating_estimado: z.number().min(0).max(5),
+
+  imagem: z.string().min(1), // emoji ou string qualquer
+
+  modo_preparo: z.array(z.string().min(3)).min(1),
+
   tags: z.array(z.string()).optional().default([]),
+
   macro_estimada: MacroSchema,
+
   observacoes: z.string().optional().default(""),
 });
 
 export const RecipeListSchema = z.object({
-  receitas: z.array(RecipeSchema).length(3),
+  receitas: z.array(RecipeSchema).min(1),
 });

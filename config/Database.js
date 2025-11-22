@@ -157,6 +157,57 @@ class Database {
         }
     }
 
+    async getSuggestionByName(uid, nomeReceita) {
+        try {
+            if (!uid) {
+                throw new Error("UID do usuário não informado");
+            }
+
+            if (!nomeReceita) {
+                throw new Error("Nome da receita não informado");
+            }
+
+            const userRef = doc(db, this.user, uid);
+            const suggestionsRef = collection(userRef, this.subcollections.suggestions);
+
+            const snapshot = await getDocs(suggestionsRef);
+
+            if (snapshot.empty) {
+                return { success: false, message: "Nenhuma sugestão encontrada para esse usuário." };
+            }
+
+            // Pelo seu modelo atual você usa só o primeiro doc de sugestões
+            const suggestionsDoc = snapshot.docs[0].data();
+            const receitas = Array.isArray(suggestionsDoc.receitas)
+                ? suggestionsDoc.receitas
+                : [];
+
+            // Aqui filtro pelo nome. Dá pra usar 'nome' ou 'name' pra ser mais resiliente.
+            const encontradas = receitas.filter((r) => {
+                const nome = r.nome || r.name || "";
+                return nome.toLowerCase() === nomeReceita.toLowerCase();
+            });
+
+            if (encontradas.length === 0) {
+                return {
+                    success: false,
+                    message: "Nenhuma sugestão encontrada com esse nome.",
+                    data: []
+                };
+            }
+
+            return {
+                success: true,
+                message: "Sugestões encontradas com sucesso.",
+                data: encontradas
+            };
+        } catch (error) {
+            console.error(`[Database::getSuggestionByName] uid:${uid}, nome:${nomeReceita}`, error);
+            throw error;
+        }
+    }
+
+
     async addFavorite(uid, favoriteData) {
         try {
 
@@ -182,7 +233,7 @@ class Database {
             let receitasAtuais = [];
 
             if (snapshot.empty) {
-            
+
                 favoritesDocRef = await addDoc(favoritesRef, {
                     receitas: [],
                     createdAt: Timestamp.now(),
@@ -201,11 +252,11 @@ class Database {
             let acao;
 
             if (indexExistente !== -1) {
-                
+
                 receitasAtuais.splice(indexExistente, 1);
                 acao = "removed";
             } else {
-                
+
                 receitasAtuais.push({
                     ...favoriteData,
                     favoritedAt: Timestamp.now(),
@@ -213,7 +264,7 @@ class Database {
                 acao = "added";
             }
 
-            
+
             await updateDoc(favoritesDocRef, {
                 receitas: receitasAtuais,
                 updatedAt: Timestamp.now(),
@@ -256,6 +307,57 @@ class Database {
             throw error;
         }
     }
+
+    async getFavoriteByName(uid, nomeReceita) {
+    try {
+        if (!uid) {
+            throw new Error("UID do usuário não informado");
+        }
+
+        if (!nomeReceita) {
+            throw new Error("Nome da receita não informado");
+        }
+
+        const userRef = doc(db, this.user, uid);
+        const favoritesRef = collection(userRef, this.subcollections.favorites);
+
+        const snapshot = await getDocs(favoritesRef);
+
+        if (snapshot.empty) {
+            return { success: false, message: "Nenhum favorito encontrado para esse usuário." };
+        }
+
+        // Pelo seu modelo atual você usa só o primeiro doc de favoritos
+        const favoritesDoc = snapshot.docs[0].data();
+        const receitas = Array.isArray(favoritesDoc.receitas)
+            ? favoritesDoc.receitas
+            : [];
+
+        // Filtro pelo nome. Considero 'nome' e 'name' para ser mais resiliente.
+        const encontrados = receitas.filter((r) => {
+            const nome = r.nome || r.name || "";
+            return nome.toLowerCase() === nomeReceita.toLowerCase();
+        });
+
+        if (encontrados.length === 0) {
+            return {
+                success: false,
+                message: "Nenhum favorito encontrado com esse nome.",
+                data: []
+            };
+        }
+
+        return {
+            success: true,
+            message: "Favoritos encontrados com sucesso.",
+            data: encontrados
+        };
+    } catch (error) {
+        console.error(`[Database::getFavoriteByName] uid:${uid}, nome:${nomeReceita}`, error);
+        throw error;
+    }
+}
+
 
     /* Métodos Génericos */
 
